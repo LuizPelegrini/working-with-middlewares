@@ -24,8 +24,13 @@ function checksExistsUserAccount(request, response, next) {
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request;
 
+  if(!user.pro && user.todos.length > 10){
+    return response.status(403).json({ error: 'You used all your free todos. Change it to PRO to unlock more todos '});
+  }
+
+  return next();
 }
 
 function checksTodoExists(request, response, next) {
