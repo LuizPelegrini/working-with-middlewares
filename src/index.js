@@ -9,6 +9,7 @@ app.use(cors());
 
 const users = [];
 
+// check whether if username is already taken
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
@@ -23,6 +24,7 @@ function checksExistsUserAccount(request, response, next) {
   return next();
 }
 
+// check whether free user has used all todos
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
 
@@ -34,7 +36,29 @@ function checksCreateTodosUserAvailability(request, response, next) {
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers;
+  const { id } = request.params;
+
+  const isUuid = validate(id);
+
+  if(!isUuid){
+    return response.status(400).json({ error: 'Id is not valid' });
+  }
+
+  const userAlreadyExists = users.some(user => user.username === username);
+  if(!userAlreadyExists){
+    return response.status(404).json({ error: 'User does not exist' });
+  }
+
+  const todoAlreadyExists = userAlreadyExists.todos.some(todo => todo.id === id);
+  if(!todoAlreadyExists){
+    return response.status(404).json({ error: 'Todo does not exist' });
+  }
+
+  request.todo = todoAlreadyExists;
+  request.user = userAlreadyExists;
+
+  return next();
 }
 
 function findUserById(request, response, next) {
