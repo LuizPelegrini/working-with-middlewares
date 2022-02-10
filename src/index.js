@@ -13,7 +13,7 @@ const users = [];
 function checksExistsUserAccount(request, response, next) {
   const { username } = request.headers;
 
-  const usernameAlreadyExists = users.some((user) => user.username === username);
+  const usernameAlreadyExists = users.find((user) => user.username === username);
 
   if (usernameAlreadyExists) {
     return response.status(400).json({ error: 'Username already exists' });
@@ -28,7 +28,7 @@ function checksExistsUserAccount(request, response, next) {
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request;
 
-  if(!user.pro && user.todos.length > 10){
+  if(!user.pro && user.todos.length >= 10){
     return response.status(403).json({ error: 'You used all your free todos. Change it to PRO to unlock more todos '});
   }
 
@@ -45,12 +45,12 @@ function checksTodoExists(request, response, next) {
     return response.status(400).json({ error: 'Id is not valid' });
   }
 
-  const userAlreadyExists = users.some(user => user.username === username);
+  const userAlreadyExists = users.find(user => user.username === username);
   if(!userAlreadyExists){
     return response.status(404).json({ error: 'User does not exist' });
   }
 
-  const todoAlreadyExists = userAlreadyExists.todos.some(todo => todo.id === id);
+  const todoAlreadyExists = userAlreadyExists.todos.find(todo => todo.id === id);
   if(!todoAlreadyExists){
     return response.status(404).json({ error: 'Todo does not exist' });
   }
@@ -64,12 +64,14 @@ function checksTodoExists(request, response, next) {
 function findUserById(request, response, next) {
   const { id } = request.params;
 
-  const userAlreadyExists = users.some(user => user.id === id);
+  const userAlreadyExists = users.find(user => user.id === id);
   if(!userAlreadyExists){
     return response.status(404).json({ error: 'User does not exist' });
   }
 
   request.user = userAlreadyExists;
+
+  return next();
 }
 
 app.post('/users', (request, response) => {
